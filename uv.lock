@@ -4645,7 +4645,7 @@ wheels = [
 
 [[package]]
 name = "openedx-core"
-version = "1.18.0"
+version = "1.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -4661,9 +4661,9 @@ dependencies = [
     { name = "rules" },
     { name = "tomlkit" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a0/01/ee46c3cf1136bd4cf50e1ececb1bb2edf4c2d4d2d80f2a8acf247f8b1f48/openedx_core-1.18.0.tar.gz", hash = "sha256:348064a50c57e63b63db43f91d281f73f2464a1d5d83e086aa55553cc8bf5901", size = 1008556, upload-time = "2026-10-29T13:30:56.186Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/77/91c5d247bd61fe4d82a38bb909f6bcb50d59db898e513ac2addba4e0e91d/openedx_core-1.20.0.tar.gz", hash = "sha256:2f02e91a29b66c9da6eb0b79fcec67f3e8d10730428b2f8866c30b991052b86d", size = 1026642, upload-time = "2026-10-30T14:42:28.099Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/aa/4f/05ddb3720764c1607ea2b78086447a1c5416006541c1deda2a1cbd621a34/openedx_core-1.18.0-py3-none-any.whl", hash = "sha256:c96d3871eeb114a5ff8e5f1e667dd2b64624f143f1670ee9f53f716a2e51fe0e", size = 404244, upload-time = "2026-10-29T13:30:54.272Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/55/abaea6d5197e29737430afc76a03ee5c82ebfbb005167038477c371d2f41/openedx_core-1.20.0-py3-none-any.whl", hash = "sha256:ec3f1dc2fd15b960e471656ec54adac9a9e06a2b8f0422545518519e79d188e8", size = 408784, upload-time = "2026-10-30T14:42:26.066Z" },
 ]
 
 [[package]]
