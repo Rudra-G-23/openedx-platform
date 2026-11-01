@@ -406,6 +406,9 @@ MIDDLEWARE = [
     # Instead of AuthenticationMiddleware, we use a cache-backed version
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
+    # Answers 401 instead of a redirect to login when the client is not asking for HTML
+    'cms.djangoapps.contentstore.middleware.LoginRedirectToUnauthorizedMiddleware',
+
     'common.djangoapps.student.middleware.UserStandingMiddleware',
 
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -1309,19 +1312,18 @@ EVENT_BUS_PRODUCER_CONFIG.update({  # noqa: F405
 
 ################### Authoring API ######################
 
-# This affects the Authoring API swagger docs but not the legacy swagger docs under /api-docs/.
-REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS'] = 'drf_spectacular.openapi.AutoSchema'  # noqa: F405
+# Used by every drf-spectacular schema Studio serves, /api-docs/ included.
+REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS'] = 'cms.lib.spectacular.CmsAutoSchema'  # noqa: F405
 
-# The Authoring API schema, for any settings module that does not define its
-# own SPECTACULAR_SETTINGS -- notably cms.envs.development, which generates the
-# committed docs/cms-openapi.yaml in CI. Without these the document has no
-# title, version 0.0.0, and every endpoint in the service rather than the
-# Authoring API's own surface.
+# The Authoring API schema for every settings module, including
+# cms.envs.development, which generates the committed docs/cms-openapi.yaml in
+# CI. Without these the document has no title, version 0.0.0, and every
+# endpoint in the service rather than the Authoring API's own surface.
 #
-# devstack.py and production.py replace this wholesale, adding SERVERS and a
-# longer DESCRIPTION. Those are the only parts that depend on CMS_BASE and
-# AUTHORING_API_URL, which are empty here; the filtering and the path prefix do
-# not, so they belong at this level.
+# devstack.py and production.py set only SERVERS and a longer DESCRIPTION on
+# top of this, because those are the only parts that depend on CMS_BASE and
+# AUTHORING_API_URL, which are empty here. Everything else belongs at this
+# level so there is one copy of it.
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Authoring API',
     'DESCRIPTION': 'Experimental API to edit xblocks and course content.',
@@ -1329,10 +1331,25 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # Restrict the schema to the Authoring API's endpoints (cms/lib/spectacular.py).
     'PREPROCESSING_HOOKS': ['cms.lib.spectacular.cms_api_filter'],
-    # Trim the shared prefix from the published paths; consumers supply it
-    # through their base URL.
-    'SCHEMA_PATH_PREFIX': '/api/contentstore',
-    'SCHEMA_PATH_PREFIX_TRIM': '/api/contentstore',
+    # Mark superseded and migrated legacy addresses deprecated, and BFF surfaces
+    # x-internal. The enum hook is drf-spectacular's default, restated because
+    # setting this key replaces the default list.
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'cms.lib.spectacular.cms_mark_superseded_paths',
+        'cms.lib.spectacular.cms_mark_migrated_paths',
+        'openedx.core.apidocs.untag_deprecated_operations',
+    ],
+    # Stripped from each path to derive its tags and operationId, so changing
+    # it renames every operationId. Paths are published in full, from the
+    # service root, so /api/contentstore and /api/authoring resolve against the
+    # same base URL.
+    'SCHEMA_PATH_PREFIX': r'/api/(contentstore|authoring)',
+    # Serve the Swagger UI and ReDoc assets from drf-spectacular-sidecar rather
+    # than drf-spectacular's default unpinned jsdelivr CDN URLs.
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
 }
 
 ################### Studio Search (beta), using Meilisearch ###################
